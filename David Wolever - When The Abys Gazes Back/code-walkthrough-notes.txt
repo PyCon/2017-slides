@@ -1,0 +1,54 @@
+WALKTHROUGH_STARTING_POINT
+- explain VM eval loop
+- this handles the compare instruction
+- trace through code 'till slow_compare
+
+
+cmp_outcome, first pass
+- trace down until default case and PyObject_RichCompare
+
+
+PyObject_RichCompare
+- PyInstance_Check, old and new style classes
+- C struct attribute access
+- Rich comparisons
+- PyString_Type->tp_richcompare
+
+
+PyString_Type
+- PyString_Type defines all the attributes of `str` objects:
+    - tp_str is __str__
+    - tp_repr is __repr__
+    - tp_doc is __doc__
+    - etc
+- We're interested in tp_richcompare, which doesn't have am equivilent dunder
+  method.
+
+
+string_richcompare
+- This is the function called to compare two strings
+- `a` and `b` are the strings, and `op` is the comparison operation
+- Large comment about string interning
+- Finish trace at `result = Py_True`
+
+
+(pop back up to WALKTHROUGH_STARTING_POINT)
+
+cmp_outcome, second pass
+- Follow to `case PyCmp_IN` then down PySequence_Contains
+
+
+PySequence_Contains
+- Comments in PyType_HasFeature
+- Follow to PyTuple_Type
+
+
+PyTuple_Type -> tuple_as_sequence -> tuplecontains
+- Comments
+- Follow to PyObject_RichCompareBool
+
+PyObject_RichCompareBool
+- Comments
+- Finish trace at `return 1`
+
+

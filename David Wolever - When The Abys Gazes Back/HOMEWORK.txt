@@ -1,0 +1,9 @@
+1. Slide 34: Where is the "Hello, %s" format string in the bytecode for
+   say_hello?
+
+2. Slide 44: Why is there only one item in func_closure?
+
+3. Python-2.7.12/Objects/object.c line 964: explain exactly why `@property`
+   doesn't work with old style classes.
+
+4. Slide 84: Why can't you override __len__?
