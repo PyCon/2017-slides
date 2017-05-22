@@ -1,0 +1,3 @@
+[submodule "Filipe_Pires_Alvarenga_conda-forge"]
+	path = Filipe_Pires_Alvarenga_conda-forge
+	url = https://github.com/ocefpaf/talk_pycon2017
