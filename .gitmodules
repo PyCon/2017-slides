@@ -1,3 +1,6 @@
+[submodule "Torsten Scholak - Bayesian Machine Learning"]
+	path = Torsten Scholak - Bayesian Machine Learning
+	url = git@github.com:UnataInc/PyCon2017
 [submodule "Filipe_Pires_Alvarenga_conda-forge"]
 	path = Filipe_Pires_Alvarenga_conda-forge
 	url = https://github.com/ocefpaf/talk_pycon2017
