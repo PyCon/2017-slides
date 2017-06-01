@@ -1,0 +1,271 @@
+---
+- Before I get started: I just want to note that I'm going to cover a lot of topics briefly
+- I have these slides, notes, and links to further reading about everything I mention at the URL here
+- And I'll have the URL up again at the end so if you miss it now you can get it then
+- 
+---
+- You write beautiful Python code
+- If you think it'll be useful to others, you want to share it
+- When you share it, you want to do it in a way that people to know how to download and use it
+- And you may even want people to collaborate with you to make the code even better
+---
+- What do we need in order to do that? 
+---
+- First, we need to package the code
+- And then upload it to the package index
+- This allows people to install it the way they expect, via pip
+---
+- I also said that we want people to know how to use the code
+- This means having documentation
+- What else?
+---
+- If we want people to be able to collaboarate with us to make the code better
+- then we need to put the code somewhere people can access it
+- This typically means putting it on GitHub, Bitbucket, GitLab, or another provider
+---
+- And we want to make sure the when people make changes they don't break things
+- So we need tests
+---
+- we want the tests to be run automaticlaly 
+- so we can see if any incoming contributions breaks things
+- so we should set up a continuous integration service to run our tests
+---
+- we should have a license so people know under what terms they can use the code
+---
+- we should probably have contributing instructions so people know how to go about helping
+- this should include things like
+- should they open an issue first?
+- submit a pull request?
+- what kind of things do you want help with?
+---
+- Now we have a list of things we need to do to share our code
+---
+- at this point you may be thinking that setting up all of this sounds like a lot of work
+- and you know it would be
+---
+- If you only take one thing away from this talk, I hope it's this:
+- Because someone has already done a lot of work to get these things set up for you
+- Use cookiecutter
+- cookiecutter is a tool that allows you to make new projects from templates
+- templates can be for any kind of project but there a number of good ones for python packages -- i have one linked with the notes
+- My recommendation is to start with a template that's close to what you want
+- fork it, and then updated it for your preferences
+- you can then use that when you make new projects
+---
+- before we go any further I want to go over some terminology just to make sure we're using the same language. 
+---
+- Anything importable from a file
+---
+- Just a directory structure for organizing python modules
+---
+- Then a distribution package is your code
+- bundled-up in a way that it can be shared and installed
+- This talk is about sharing your code so for the rest of the talk the term "package" refers to one of these
+- of course to make things more complex there are multiple types of distrubtion packages
+---
+- a source distribution contains bundled source code
+- this includes extension source if you have extensions in anohter language like C
+- when you install a source distribution any extensions are complied at install time
+---
+- built distributions are built or compiled beforehand so they just need to be unpacked at install time
+- eggs are an older format may see referenced
+- but wheels are the current built distribution format and you should be making them for your projects
+- for a while the package index only supported uploading weels for windows and mac
+- more recently the manylinux platform tag was developed
+- it defines a lowest-common denominator linux interface which allows wheels to be built that will work on most linux systems
+---
+- and of course there are multiple types of wheels too
+- a universal wheel is one that contains only python code and is compatible with python 2 and 3
+- a pure python wheel is specific to either 2 or 3 but is still only python code
+- a platform wheel has compiled code so it's specific to a target platform
+- one has to be created for every platform on which you want to 
+---
+- this is the extremely short version of packaging history
+- the packaging ecosystem grew organically and for a long time it wasn't clear what was considered the current best practice
+- if you searched online you'd find lots of conflicting information about how to do things
+- so the way i'd go about packaging  was: i'd find a project that seemed to have it together and make a copy
+- and then replace their code with mine and then change the project name in the files
+- then in 2011 the packaging authority working group was created to take over maintenance of core packaging tools
+- and they've since worked to make some great improvements to the packaging ecosystem
+- besides the specification and tooling improvements, another major contribution of the working group is maintenance of the python packaging user guide
+- so we finally have an authoritative resource for how we should be creating and installing packages
+---
+- Let's make a package for our code
+---
+- when you use cookiecutter it prompts you for some information about your project
+- and then generates a directory structure for your project customized with your input
+---
+- here is an overview of the files that make up a minimal package
+- most templates will have more but we'll take a look at these files first
+---
+- The first part is your code
+- the directory was created by cookiecutter and then the code was copied into it
+- a common pattern is to store your code in an import package with the same name as the project
+---
+- most important file for packaging and distribution
+- has info about the package that's used during installation and by the package index
+- note that it's just python code and that it's executed during installation
+- this would allow you to do some fancy things
+- but don't do fancy things
+---
+- configuration file to go along with setup.py
+- it's commonly used for configuring wheel building options and configuration for packaging related plugins and tooling 
+---
+- by default your python code will be included when you build a distrubtion package
+- but if you need any non-python files to be included they need to be listed in MANIFEST.in
+- this is typically used for things like data files, configuration, and docs
+---
+- the README is what people see when they browse your project on source hosting like github
+- it's also commonly used as the long discription for the package index
+- it should contain general information about what your code does, basic usage instructions, and where to find more info like a link to your docs
+---
+- now let's take a look at a setup.py
+- we import setup and optionally find_packages from setuptools
+- then the packaging settings are defined as arguments to the setup function
+---
+- then we define basic package meta-information
+- like name of project
+- a description of the project
+- the version number
+- author information
+- long_description
+- often you'll see long_description loaded from README / DESCRIPTION
+---
+- then we define what import packages should be included in the distribution
+- they can be listed manually but the find_package we imported above will do it for you
+- if you use it you exclude things that aren't meant to be installed
+---
+- install_requires is what is used to determine the dependencies of your package at install time
+- so when you pip install the package, things listed here will be installed
+- note that this is different from requirements.txt we'll look at that in a moment but i've linked to a page with more details about the distinctions in the notes
+---
+- then package data allows you to define extra files that will be included in your pacakge
+- they are exposed to your code via the name on the left so you don't have to worry about calculating paths
+---
+        'Development Status :: 3 - Alpha',
+- Entry points defines interfaces that your package provides
+- this is commonly used for defining plugins
+- console_scripts is a special type of entry point
+- it creates commands that map command names on the left to your python code on the right
+- it's good to use this because it does the right thing depending on the OS
+- on linux and mac it'll create a wrapper script and put it on the path
+- on windows it'll create a small exe file that knows how to find the right code
+---
+        'Development Status :: 3 - Alpha',
+- Indicate the license under which your code is released
+- Then the classifiers section lists categorization information about the package
+- this is typically used to indicate which versions of python you intend to support
+- but as of now nothing is enforced based on this information
+---
+*       'Development Status :: 3 - Alpha',
+- Indicate the license under which your code is released
+- Then the classifiers section lists categorization information about the package
+- this is typically used to indicate which versions of python you intend to support
+- but as of now nothing is enforced based on this information
+- install_requires ensures dependencies are met
+- package_data is mapping pkg name to relative path
+- data_files can specify data outside of your path
+- scripts can specify an individual script
+- entry_points is used for dynamic plugin discovery
+- most common entry_point is console scripts
+- console scripts makes an executable wrapper
+---
+- the setup.cfg file contains additional packaging settings
+- here we see settings for wheel building
+- and for the plugin flake8
+---
+- manifest.in lists files that should be included or excluded on top of what setuptools finds
+---
+-----
+- the readme is in restructured text format and 
+---
+- If you're publishing your code, you need a license
+- Coose from one of the common OS licenses unless your laywer tells you otherwise 
+- include it in a file named license and reference it in your README and setup.py
+---
+- even if this is just an experimental project, you need tests
+- but at minimum, test that the most basic use case works as expected
+- then if you're looking to improve coverage, note that you want help with tests in your contributing instructions
+- people are a lot more likely to expand on existing tests than they are to create them for you from scratch
+- your template should include configuration for running your tests
+- in my case using tox
+---
+- like tests you should have at least basic usage documentation
+- again, people are a lot more likely to add to existing documentation than they are to add docs wholesale
+- the templates will give you good structure for your documentation and you should at least fill in the usage information
+---
+- the template should include configuration for your CI service
+- i use travis ci by default but if you have a different service your template should have configuration for that
+---
+- this serves a different purpose than the install_requires in setup.py
+- this is generally a list of dependencies used by developers
+- a great tool for managing this is called pip-tools
+- i have a link to it in my further reading
+---
+---
+- ok, we have all of our files in place and we're ready to share the code
+---
+- assuming we're using git we'll add our code to source control
+---
+---
+---
+---
+- we're going to create a new github repo
+---
+- add our repo to travis
+- sign in with github
+- click + next to my repos
+---
+- push our code to github
+---
+- go back to travis and see our builds are succeeding
+---
+- next we're going to set up documentation hosting
+- sign up for account / login
+- click import from github
+- select project, verify settings
+- click build, wait -> view
+---
+- create an account on pypi
+- you'll use this when uplading packages
+- note that there's a test instance of the package index
+- so if you want to experiment with the upload process you can do it there without adding more junk to the real index 
+---
+- to make things easier for you
+- you should save some settings in a .pypirc file in your home directory
+- Can omit password and the tools will prompt you for them instead 
+- Can configure alternate indexes
+---
+- should work in a virtualenv
+- check out pew or virtualenvwrapper to make things easier for you
+---
+- depending on your environment you may need to install wheel
+- and install twine, which is a tool for uploading your packages to the index
+---
+- run commands to build distrubiton files
+- if you use one of the default templates it'll give you a Makefile that includes make dist
+---
+- twine will register the package if it's not already registered
+- and then upload your distribution files
+- you should use twine because the upload command that's built into setup.py is insecure
+---
+- now you can install your package via pip
+---
+- going-forward you can install your package in editable development mode
+- this will make it so that you can edit your code and see the changes in your virtualenv without reinstalling
+- note that if you change the entry points at all you do need to re-run the install command
+---
+- then you can change your code
+- update the version
+- commit and push
+- verify tests are passing
+- build distribution files
+- upload them to pypi
+---
+- two tools that take different approaches to this are bumpversion and versioneer
+---
+- don't set up all this stuff by hand
+- use existing templates
+- take the time to set up tools and services that will make your life easier in the long run
+- share your code so other people can benefit from the cool stuff you do
+---
